@@ -56,4 +56,4 @@ Para el ingreso del paciente a urgencias se deben tener en cuenta los siguientes
 
 7. **Ingresa un paciente A con nivel de emergencia X, hay en espera un paciente B con nivel de emergencia Y donde X = Y** → se registra el ingreso y se debe atender primero al que ingresó primero.
 
-puedes crear una nueva historia de usuario en la carpeta docs\HistoriasDeUsuario, con el contenido que te proporcione arriba? que sea extension .md
+

@@ -48,28 +48,50 @@ def step_impl(context):
     excepcion_esperada = None
 
     for row in context.table:
-        cuil = row['Cuil']
-        informe = row['Informe']
+        cuil = row['Cuil'] if row['Cuil'].strip() else None
+        informe = row['Informe'] if row['Informe'].strip() else None
         nivel_emergencia_str = row['Nivel de Emergencia']
-        temperatura = float(row['Temperatura'])
-        frecuencia_cardiaca = float(row['Frecuencia Cardiaca'])
-        frecuencia_respiratoria = float(row['Frecuencia Respiratoria'])
-        tension_arterial_str = row['Tension Arterial']
 
-        # Parse tension arterial (format: "120/80")
-        tension_parts = tension_arterial_str.split('/')
-        frecuencia_sistolica = float(tension_parts[0])
-        frecuencia_diastolica = float(tension_parts[1])
+        # Convertir campos numéricos solo si no están vacíos
+        temperatura_str = row['Temperatura'].strip()
+        temperatura = float(temperatura_str) if temperatura_str else None
 
-        # Find the corresponding NivelEmergencia enum
+        frecuencia_cardiaca_str = row['Frecuencia Cardiaca'].strip()
+        frecuencia_cardiaca = float(frecuencia_cardiaca_str) if frecuencia_cardiaca_str else None
+
+        frecuencia_respiratoria_str = row['Frecuencia Respiratoria'].strip()
+        frecuencia_respiratoria = float(frecuencia_respiratoria_str) if frecuencia_respiratoria_str else None
+
+        tension_arterial_str = row['Tension Arterial'].strip()
+
+        # Leer campos opcionales si están presentes en la tabla
+        nombre_valor = row.get('nombre') or row.get('Nombre') or ''
+        apellido_valor = row.get('apellido') or row.get('Apellido') or ''
+        obra_social_valor = row.get('obra social') or row.get('Obra Social') or ''
+
+        nombre = nombre_valor.strip() if nombre_valor.strip() else None
+        apellido = apellido_valor.strip() if apellido_valor.strip() else None
+        obra_social = obra_social_valor.strip() if obra_social_valor.strip() else None
+
+        # Parse tension arterial (format: "120/80") solo si no está vacío
+        frecuencia_sistolica = None
+        frecuencia_diastolica = None
+        if tension_arterial_str:
+            tension_parts = tension_arterial_str.split('/')
+            if len(tension_parts) == 2:
+                frecuencia_sistolica = float(tension_parts[0])
+                frecuencia_diastolica = float(tension_parts[1])
+
+        # Find the corresponding NivelEmergencia enum solo si no está vacío
         nivel_emergencia = None
-        for nivel in NivelEmergencia:
-            if nivel.value['nombre'] == nivel_emergencia_str:
-                nivel_emergencia = nivel
-                break
+        if nivel_emergencia_str.strip():
+            for nivel in NivelEmergencia:
+                if nivel.value['nombre'] == nivel_emergencia_str:
+                    nivel_emergencia = nivel
+                    break
 
-        if nivel_emergencia is None:
-            raise ValueError(f"Nivel de emergencia desconocido: {nivel_emergencia_str}")
+            if nivel_emergencia is None:
+                raise ValueError(f"Nivel de emergencia desconocido: {nivel_emergencia_str}")
 
         try:
             ingreso, mensaje = servicio_urgencias.registrar_urgencia(
@@ -81,7 +103,10 @@ def step_impl(context):
                 frecuencia_cardiaca=frecuencia_cardiaca,
                 frecuencia_respiratoria=frecuencia_respiratoria,
                 frecuencia_sistolica=frecuencia_sistolica,
-                frecuencia_diastolica=frecuencia_diastolica
+                frecuencia_diastolica=frecuencia_diastolica,
+                nombre=nombre,
+                apellido=apellido,
+                obra_social=obra_social
             )
         except Exception as e:
             excepcion_esperada = e
@@ -99,9 +124,14 @@ def step_impl(context):
     ingresos_pendientes = servicio_urgencias.obtener_ingresos_pendientes()
     cuils_actuales = [ingreso.cuil_paciente for ingreso in ingresos_pendientes]
 
+    # Debug print
+    print(f"\n[DEBUG] CUILs esperados: {cuils_esperados}")
+    print(f"[DEBUG] CUILs actuales: {cuils_actuales}")
+    print(f"[DEBUG] Total ingresos pendientes: {len(cuils_actuales)}")
+
     # Assert the lists match
     assert len(cuils_actuales) == len(cuils_esperados), \
-        f"Expected {len(cuils_esperados)} entries, but got {len(cuils_actuales)}"
+        f"Expected {len(cuils_esperados)} entries, but got {len(cuils_actuales)}. Actual: {cuils_actuales}"
 
     for expected, actual in zip(cuils_esperados, cuils_actuales):
         assert expected == actual, f"Expected CUIL {expected}, but got {actual}"
@@ -153,31 +183,44 @@ def step_impl(context):
     datos_paciente_nuevo = None
 
     row = context.table[0]
-    cuil = row['Cuil']
-    apellido = row['Apellido']
-    nombre = row['Nombre']
-    obra_social = row['Obra Social']
-    informe = row['Informe']
+    cuil = row['Cuil'] if row['Cuil'].strip() else None
+    apellido = row['Apellido'] if row['Apellido'].strip() else None
+    nombre = row['Nombre'] if row['Nombre'].strip() else None
+    obra_social = row['Obra Social'] if row['Obra Social'].strip() else None
+    informe = row['Informe'] if row['Informe'].strip() else None
     nivel_emergencia_str = row['Nivel de Emergencia']
-    temperatura = float(row['Temperatura'])
-    frecuencia_cardiaca = float(row['Frecuencia Cardiaca'])
-    frecuencia_respiratoria = float(row['Frecuencia Respiratoria'])
-    tension_arterial_str = row['Tension Arterial']
 
-    # Parse tension arterial (formato: "120/80")
-    tension_parts = tension_arterial_str.split('/')
-    frecuencia_sistolica = float(tension_parts[0])
-    frecuencia_diastolica = float(tension_parts[1])
+    # Convertir campos numéricos solo si no están vacíos
+    temperatura_str = row['Temperatura'].strip()
+    temperatura = float(temperatura_str) if temperatura_str else None
 
-    # Encontrar el correspondiente NivelEmergencia enum
+    frecuencia_cardiaca_str = row['Frecuencia Cardiaca'].strip()
+    frecuencia_cardiaca = float(frecuencia_cardiaca_str) if frecuencia_cardiaca_str else None
+
+    frecuencia_respiratoria_str = row['Frecuencia Respiratoria'].strip()
+    frecuencia_respiratoria = float(frecuencia_respiratoria_str) if frecuencia_respiratoria_str else None
+
+    tension_arterial_str = row['Tension Arterial'].strip()
+
+    # Parse tension arterial (formato: "120/80") solo si no está vacío
+    frecuencia_sistolica = None
+    frecuencia_diastolica = None
+    if tension_arterial_str:
+        tension_parts = tension_arterial_str.split('/')
+        if len(tension_parts) == 2:
+            frecuencia_sistolica = float(tension_parts[0])
+            frecuencia_diastolica = float(tension_parts[1])
+
+    # Encontrar el correspondiente NivelEmergencia enum solo si no está vacío
     nivel_emergencia = None
-    for nivel in NivelEmergencia:
-        if nivel.value['nombre'] == nivel_emergencia_str:
-            nivel_emergencia = nivel
-            break
+    if nivel_emergencia_str.strip():
+        for nivel in NivelEmergencia:
+            if nivel.value['nombre'] == nivel_emergencia_str:
+                nivel_emergencia = nivel
+                break
 
-    if nivel_emergencia is None:
-        raise ValueError(f"Nivel de emergencia desconocido: {nivel_emergencia_str}")
+        if nivel_emergencia is None:
+            raise ValueError(f"Nivel de emergencia desconocido: {nivel_emergencia_str}")
 
     try:
         # Guardar los datos del paciente para verificación posterior
@@ -244,3 +287,70 @@ def step_impl(context, cuil: str):
 
         assert paciente.obra_social.nombre == datos_paciente_nuevo['obra_social'], \
             f"Esperado obra social {datos_paciente_nuevo['obra_social']}, pero se obtuvo {paciente.obra_social.nombre}"
+
+
+@then('se muestra un error de validacion indicando que "{campo}" no puede ser negativo')
+def step_impl(context, campo: str):
+    global excepcion_esperada
+
+    assert excepcion_esperada is not None, \
+        f"Se esperaba una excepcion de validacion pero no se lanzo ninguna"
+
+    mensaje_esperado = f"La {campo} no puede ser negativa"
+    mensaje_obtenido = str(excepcion_esperada)
+
+    assert mensaje_esperado == mensaje_obtenido, \
+        f"Se esperaba el mensaje de error: '{mensaje_esperado}'\nPero se obtuvo: '{mensaje_obtenido}'"
+
+
+@given("que hay pacientes en espera:")
+def step_impl(context):
+    """
+    Registra pacientes que ya están en la lista de espera de urgencias.
+    Este step se utiliza para configurar un estado inicial donde ya hay pacientes esperando atención.
+    """
+    global enfermera, servicio_urgencias
+
+    # Iterar sobre cada fila de la tabla del contexto
+    for row in context.table:
+        # Extraer los datos del paciente
+        cuil = row['Cuil']
+        informe = row['Informe']
+        nivel_emergencia_str = row['Nivel de Emergencia']
+
+        # Convertir campos numéricos
+        temperatura = float(row['Temperatura'])
+        frecuencia_cardiaca = float(row['Frecuencia Cardiaca'])
+        frecuencia_respiratoria = float(row['Frecuencia Respiratoria'])
+
+        # Parse tensión arterial (formato: "120/80")
+        tension_arterial_str = row['Tension Arterial']
+        tension_parts = tension_arterial_str.split('/')
+        frecuencia_sistolica = float(tension_parts[0])
+        frecuencia_diastolica = float(tension_parts[1])
+
+        # Encontrar el correspondiente NivelEmergencia enum
+        nivel_emergencia = None
+        for nivel in NivelEmergencia:
+            if nivel.value['nombre'] == nivel_emergencia_str:
+                nivel_emergencia = nivel
+                break
+
+        if nivel_emergencia is None:
+            raise ValueError(f"Nivel de emergencia desconocido: {nivel_emergencia_str}")
+
+        # Llamar al servicio para registrar la urgencia
+        servicio_urgencias.registrar_urgencia(
+            cuil=cuil,
+            enfermera=enfermera,
+            informe=informe,
+            nivel_emergencia=nivel_emergencia,
+            temperatura=temperatura,
+            frecuencia_cardiaca=frecuencia_cardiaca,
+            frecuencia_respiratoria=frecuencia_respiratoria,
+            frecuencia_sistolica=frecuencia_sistolica,
+            frecuencia_diastolica=frecuencia_diastolica,
+            nombre=None,
+            apellido=None,
+            obra_social=None
+        )
