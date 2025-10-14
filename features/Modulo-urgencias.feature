@@ -1,0 +1,33 @@
+Feature: Modulo de Urgencias
+    Esta feature esta relacionada al registro de ingresos de pacientes en la sala de urgencias
+    respetando su nivel de prioridad y el horario de llegada.
+
+    Background:
+        Given que la siguiente enfermera esta registrada:
+            | Nombre | Apellido |
+            | Maria  | Lopez    |
+
+
+    Scenario: Ingreso de un paciente que existe en el sistema
+        Given que estan registrados los siguientes pacientes:
+            | Cuil          | Apellido | Nombre | Obra Social |
+            | 20-12345678-9 | Gonzalez | Juan   | OSDE        |
+        When Ingresan a urgencias los siguientes pacientes:
+            | Cuil          | Informe                | Nivel de Emergencia | Temperatura | Frecuencia Cardiaca | Frecuencia Respiratoria | Tension Arterial |
+            | 20-12345678-9 | Dolor toracico intenso | Emergencia          | 37.5        | 95                  | 20                      | 140/90           |
+        Then La lista de espera esta ordenada por cuil de la siguiente manera:
+            | Cuil          |
+            | 20-12345678-9 |
+        And el ingreso del paciente con cuil "20-12345678-9" queda registrado con estado "PENDIENTE"
+
+    Scenario: Ingreso de un paciente que no existe en el sistema
+        Given que no hay pacientes registrados en el sistema
+        When se intenta ingresar a urgencias el siguiente paciente:
+            | Cuil          | Apellido | Nombre | Obra Social   | Informe                     | Nivel de Emergencia | Temperatura | Frecuencia Cardiaca | Frecuencia Respiratoria | Tension Arterial |
+            | 27-98765432-1 | Martinez | Sofia  | Swiss Medical | Fractura de brazo izquierdo | Urgencia            | 36.8        | 88                  | 18                      | 130/85           |
+        Then se muestra un mensaje de error indicando que el paciente no existe y que se debe registrar antes de proceder al ingreso
+        And el paciente con cuil "27-98765432-1" es creado en el sistema con los datos del ingreso
+        And La lista de espera esta ordenada por cuil de la siguiente manera:
+            | Cuil          |
+            | 27-98765432-1 |
+        And el ingreso del paciente con cuil "27-98765432-1" queda registrado con estado "PENDIENTE"

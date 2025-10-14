@@ -1,0 +1,210 @@
+from enum import Enum
+from datetime import datetime, timedelta
+from typing import Optional
+
+
+# ============= Value Objects =============
+
+class Frecuencia:
+    """Clase base para value objects de frecuencia"""
+    def __init__(self, valor: float):
+        if valor < 0:
+            raise ValueError(f"La {self.__class__.__name__} no puede ser negativa")
+        self.valor = valor
+
+
+class Temperatura(Frecuencia):
+    """Value object para temperatura corporal"""
+    pass
+
+
+class FrecuenciaCardiaca(Frecuencia):
+    """Value object para frecuencia cardíaca"""
+    def __init__(self, valor: float):
+        if valor < 0:
+            raise ValueError("La Frecuencia Cardiaca no puede ser negativa")
+        self.valor = valor
+
+
+class FrecuenciaRespiratoria(Frecuencia):
+    """Value object para frecuencia respiratoria"""
+    def __init__(self, valor: float):
+        if valor < 0:
+            raise ValueError("La Frecuencia Respiratoria no puede ser negativa")
+        self.valor = valor
+
+
+class TensionArterial:
+    """Value object para tensión arterial (sistólica/diastólica)"""
+    def __init__(self, frecuencia_sistolica: float, frecuencia_diastolica: float):
+        if frecuencia_sistolica < 0:
+            raise ValueError("La Frecuencia Sistolica no puede ser negativa")
+        if frecuencia_diastolica < 0:
+            raise ValueError("La Frecuencia Diastolica no puede ser negativa")
+        self.frecuencia_sistolica = frecuencia_sistolica
+        self.frecuencia_diastolica = frecuencia_diastolica
+
+
+# ============= Enums =============
+
+class NivelEmergencia(Enum):
+    """Enum para los niveles de emergencia según protocolo de triaje"""
+    URGENCIA = {
+        "nivel": 1,
+        "nombre": "Urgencia",
+        "duracionMaxEspera": timedelta(hours=2)
+    }
+    EMERGENCIA = {
+        "nivel": 2,
+        "nombre": "Emergencia",
+        "duracionMaxEspera": timedelta(minutes=30)
+    }
+    SIN_URGENCIA = {
+        "nivel": 3,
+        "nombre": "Sin Urgencia",
+        "duracionMaxEspera": timedelta(hours=4)
+    }
+    URGENCIA_MENOR = {
+        "nivel": 4,
+        "nombre": "Urgencia Menor",
+        "duracionMaxEspera": timedelta(hours=6)
+    }
+    CRITICA = {
+        "nivel": 0,
+        "nombre": "Critica",
+        "duracionMaxEspera": timedelta(minutes=0)
+    }
+
+
+class EstadoIngreso(Enum):
+    """Enum para los estados de un ingreso"""
+    EN_PROCESO = "EN_PROCESO"
+    FINALIZADO = "FINALIZADO"
+    PENDIENTE = "PENDIENTE"
+
+
+# ============= Entidades =============
+
+class ObraSocial:
+    """Entidad para obra social"""
+    def __init__(self, nombre: str):
+        self.nombre = nombre
+
+
+class Domicilio:
+    """Entidad para domicilio"""
+    def __init__(self, calle: str, numero: str, ciudad: str, provincia: str, pais: str):
+        self.calle = calle
+        self.numero = numero
+        self.ciudad = ciudad
+        self.provincia = provincia
+        self.pais = pais
+
+
+class Persona:
+    """Clase base para personas en el sistema"""
+    def __init__(self, cuil: str, nombre: str, apellido: str, email: str = ""):
+        self.cuil = cuil
+        self.nombre = nombre
+        self.apellido = apellido
+        self.email = email
+
+    def __str__(self):
+        return f"{self.nombre} {self.apellido} (CUIL: {self.cuil})"
+
+
+class Paciente(Persona):
+    """Entidad para paciente"""
+    def __init__(
+        self,
+        nombre: str,
+        apellido: str,
+        cuil: str,
+        obra_social: str,
+        domicilio: Optional[Domicilio] = None,
+        email: str = ""
+    ):
+        super().__init__(cuil, nombre, apellido, email)
+        # Para mantener compatibilidad con tests, aceptamos string
+        if isinstance(obra_social, str):
+            self.obra_social = ObraSocial(obra_social)
+        else:
+            self.obra_social = obra_social
+        self.domicilio = domicilio
+
+
+class Doctor(Persona):
+    """Entidad para doctor"""
+    def __init__(self, cuil: str, nombre: str, apellido: str, matricula: str, email: str = ""):
+        super().__init__(cuil, nombre, apellido, email)
+        self.matricula = matricula
+
+
+class Enfermera(Persona):
+    """Entidad para enfermera"""
+    def __init__(self, nombre: str, apellido: str, matricula: str = "", cuil: str = "", email: str = ""):
+        # Para mantener compatibilidad con tests que solo pasan nombre y apellido
+        super().__init__(cuil, nombre, apellido, email)
+        self.matricula = matricula
+
+
+class Usuario:
+    """Entidad para usuario del sistema"""
+    def __init__(self, usuario: str, password: str):
+        self.usuario = usuario
+        self.password = password
+
+
+class Atencion:
+    """Entidad para atención médica"""
+    def __init__(self, doctor: Doctor, informe: str):
+        self.doctor = doctor
+        self.informe = informe
+
+
+class Ingreso:
+    """Entidad principal para ingreso a urgencias"""
+    def __init__(
+        self,
+        id_uuid: str,
+        paciente: Paciente,
+        enfermera: Enfermera,
+        nivel_emergencia: NivelEmergencia,
+        descripcion: str,
+        temperatura: Temperatura,
+        frecuencia_cardiaca: FrecuenciaCardiaca,
+        frecuencia_respiratoria: FrecuenciaRespiratoria,
+        tension_arterial: TensionArterial,
+        fecha_ingreso: Optional[datetime] = None,
+        atencion: Optional[Atencion] = None
+    ):
+        self.id = id_uuid
+        self.paciente = paciente
+        self.enfermera = enfermera
+        self.nivel_emergencia = nivel_emergencia
+        self.descripcion = descripcion
+        self.temperatura = temperatura
+        self.frecuencia_cardiaca = frecuencia_cardiaca
+        self.frecuencia_respiratoria = frecuencia_respiratoria
+        self.tension_arterial = tension_arterial
+        self.fecha_ingreso = fecha_ingreso if fecha_ingreso else datetime.now()
+        self.atencion = atencion
+        self.estado_ingreso = EstadoIngreso.PENDIENTE
+
+    @property
+    def cuil_paciente(self) -> str:
+        """Propiedad para acceder al CUIL del paciente (compatibilidad con tests)"""
+        return self.paciente.cuil
+
+    @property
+    def estado(self) -> str:
+        """Propiedad para acceder al estado como string (compatibilidad con tests)"""
+        return self.estado_ingreso.value
+
+    def __str__(self):
+        return f"Ingreso {self.id} - {self.paciente.nombre} {self.paciente.apellido} - {self.nivel_emergencia.value['nombre']}"
+
+
+# Alias para mantener compatibilidad con código existente
+IngresoUrgencia = Ingreso
+SignosVitales = None  # Ya no se usa como clase separada
