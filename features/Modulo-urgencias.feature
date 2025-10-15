@@ -31,3 +31,46 @@ Feature: Modulo de Urgencias
             | Cuil          |
             | 27-98765432-1 |
         And el ingreso del paciente con cuil "27-98765432-1" queda registrado con estado "PENDIENTE"
+
+    Scenario: Registrar ingreso omitiendo dato mandatorio
+        Given que estan registrados los siguientes pacientes:
+            | Cuil          | Apellido | Nombre | Obra Social |
+            | 20-12345678-9 | Gonzalez | Juan   | OSDE        |
+        When Ingresan a urgencias los siguientes pacientes:
+            | Cuil          | apellido | nombre  | obra social | Informe                     | Nivel de Emergencia | Temperatura | Frecuencia Cardiaca | Frecuencia Respiratoria | Tension Arterial |
+            | 20-12345678-8 | facion   | nicolas | OSDE        |                             | Emergencia          | 37.5        | 95                  | 20                      | 140/90           |
+        Then el sistema muestra el siguiente error: "El campo informe es obligatorio"
+
+    Scenario: Registrar ingreso con valores negativos en Frecuencia Cardiaca
+        Given que estan registrados los siguientes pacientes:
+            | Cuil          | Apellido | Nombre | Obra Social |
+            | 20-12345678-9 | Gonzalez | Juan   | OSDE        |
+        When Ingresan a urgencias los siguientes pacientes:
+            | Cuil          | Informe                | Nivel de Emergencia | Temperatura | Frecuencia Cardiaca | Frecuencia Respiratoria | Tension Arterial |
+            | 20-12345678-9 | Dolor toracico intenso | Emergencia          | 37.5        | -95                 | 20                      | 140/90           |
+        Then el sistema muestra el siguiente error: "La Frecuencia Cardiaca no puede ser negativa"
+
+    Scenario: Registrar ingreso con valores negativos en Frecuencia Respiratoria
+        Given que estan registrados los siguientes pacientes:
+            | Cuil          | Apellido | Nombre | Obra Social |
+            | 20-12345678-9 | Gonzalez | Juan   | OSDE        |
+        When Ingresan a urgencias los siguientes pacientes:
+            | Cuil          | Informe                | Nivel de Emergencia | Temperatura | Frecuencia Cardiaca | Frecuencia Respiratoria | Tension Arterial |
+            | 20-12345678-9 | Dolor toracico intenso | Emergencia          | 37.5        | 95                  | -20                     | 140/90           |
+        Then el sistema muestra el siguiente error: "La Frecuencia Respiratoria no puede ser negativa"
+
+    Scenario: Ingreso de un paciente con mayor prioridad que otro en espera
+        Given que estan registrados los siguientes pacientes:
+            | Cuil          | Apellido | Nombre    | Obra Social        |
+            | 20-12345678-9 | Gonzalez | Juan      | OSDE               |
+            | 27-98765432-1 | Martinez | Sofia     | Swiss Medical      |
+        And que hay pacientes en espera:
+            | Cuil          | Informe                     | Nivel de Emergencia | Temperatura | Frecuencia Cardiaca | Frecuencia Respiratoria | Tension Arterial |
+            | 20-12345678-9 | Dolor leve en el tobillo    | Urgencia Menor      | 36.5        | 75                  | 16                      | 120/80           |
+        When Ingresan a urgencias los siguientes pacientes:
+            | Cuil          | Informe                     | Nivel de Emergencia | Temperatura | Frecuencia Cardiaca | Frecuencia Respiratoria | Tension Arterial |
+            | 27-98765432-1 | Dolor toracico intenso      | Emergencia          | 37.8        | 110                 | 24                      | 150/95           |
+        Then La lista de espera esta ordenada por cuil de la siguiente manera:
+            | Cuil          |
+            | 27-98765432-1 |
+            | 20-12345678-9 |

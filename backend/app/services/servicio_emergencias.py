@@ -22,18 +22,18 @@ class ServicioEmergencias:
     
     def registrar_urgencia(
         self,
-        cuil: str,
+        cuil: Optional[str],
         enfermera: Enfermera,
-        informe: str,
-        nivel_emergencia: NivelEmergencia,
-        temperatura: float,
-        frecuencia_cardiaca: float,
-        frecuencia_respiratoria: float,
-        frecuencia_sistolica: float,
-        frecuencia_diastolica: float,
-        nombre: Optional[str] = None,
-        apellido: Optional[str] = None,
-        obra_social: Optional[str] = None
+        informe: Optional[str],
+        nivel_emergencia: Optional[NivelEmergencia],
+        temperatura: Optional[float],
+        frecuencia_cardiaca: Optional[float],
+        frecuencia_respiratoria: Optional[float],
+        frecuencia_sistolica: Optional[float],
+        frecuencia_diastolica: Optional[float],
+        nombre: Optional[str],
+        apellido: Optional[str],
+        obra_social: Optional[str]
     ) -> Tuple[Ingreso, Optional[str]]:
         """
         Registra un ingreso de urgencia de un paciente.
@@ -64,18 +64,46 @@ class ServicioEmergencias:
             - mensaje_advertencia: Mensaje de advertencia si el paciente fue creado, None en caso contrario
 
         Raises:
-            ValueError: Si los signos vitales son inválidos
+            ValueError: Si los signos vitales son inválidos o si faltan campos mandatorios
             Exception: Si el paciente no existe y no se proporcionan los datos necesarios para crearlo
         """
+        # Validar campos mandatorios básicos
+        if cuil is None:
+            raise ValueError("El campo cuil es obligatorio")
+
+        if informe is None:
+            raise ValueError("El campo informe es obligatorio")
+
+        if nivel_emergencia is None:
+            raise ValueError("El campo nivel de emergencia es obligatorio")
+
+        if temperatura is None:
+            raise ValueError("El campo temperatura es obligatorio")
+
+        if frecuencia_cardiaca is None:
+            raise ValueError("El campo frecuencia cardiaca es obligatorio")
+
+        if frecuencia_respiratoria is None:
+            raise ValueError("El campo frecuencia respiratoria es obligatorio")
+
+        if frecuencia_sistolica is None or frecuencia_diastolica is None:
+            raise ValueError("El campo tension arterial es obligatorio")
+
         mensaje_advertencia = None
 
         # Verificar que el paciente existe
         paciente = self.pacientes_repo.obtener_paciente_por_cuil(cuil)
 
         if paciente is None:
-            # Si el paciente no existe, verificar si se proporcionaron los datos para crearlo
-            if nombre is None or apellido is None or obra_social is None:
-                raise Exception(f"El paciente con CUIL {cuil} no existe en el sistema")
+            # Validar campos necesarios para crear el paciente
+            if nombre is None:
+                raise ValueError("El campo nombre es obligatorio")
+
+            if apellido is None:
+                raise ValueError("El campo apellido es obligatorio")
+
+            if obra_social is None:
+                raise ValueError("El campo obra social es obligatorio")
 
             # Crear el paciente automáticamente
             mensaje_advertencia = "El paciente no existe en el sistema y debe ser registrado antes de proceder al ingreso"
