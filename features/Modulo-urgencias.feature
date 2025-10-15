@@ -74,3 +74,33 @@ Feature: Modulo de Urgencias
             | Cuil          |
             | 27-98765432-1 |
             | 20-12345678-9 |
+
+
+    Scenario: Ingreso de paciente con menor nivel de emergencia que un paciente en espera
+        Given que hay pacientes en espera:
+            | Cuil          | Nombre | Apellido | Nivel de Emergencia | Informe            | Temperatura | Frecuencia Cardiaca | Frecuencia Respiratoria | Tension Arterial |
+            | 20-12345678-9 | Juan   | Gonzalez | Urgencia            | Dolor leve tobillo | 36.5        | 75                  | 16                      | 120/80           |
+
+        When se ingresa a urgencias el siguiente paciente:
+            | Cuil          | Nombre | Apellido | Nivel de Emergencia | Informe        | Temperatura | Frecuencia Cardiaca | Frecuencia Respiratoria | Tension Arterial |
+            | 27-98765432-1 | Sofia  | Martinez | Emergencia             | Dolor toracico | 36.5        | 80                  | 18                      | 120/80           |
+
+        Then La lista de espera esta ordenada por prioridad de emergencia de la siguiente manera:
+            | Cuil          |
+            | 27-98765432-1 |
+            | 20-12345678-9 |
+        And el ingreso del paciente con cuil "27-98765432-1" queda registrado con estado "PENDIENTE"
+
+
+    Scenario: Ingreso de paciente con mismo nivel de emergencia que un paciente que se encuentra en espera
+        Given que hay pacientes en espera:
+            | Cuil          | Nombre  | Apellido | Obra Social | Nivel de Emergencia | Informe            | Temperatura | Frecuencia Cardiaca | Frecuencia Respiratoria | Tension Arterial |
+            | 20-12345678-9 | Juan    | Gonzalez | OSDE        | Emergencia         | Dificultad respiratoria aguda | 36.5        | 100                  | 12                      | 180/80           |
+        When se ingresa a urgencias el siguiente paciente con el mismo nivel de emergencia:
+            | Cuil          | Nombre  | Apellido | Obra Social    | Nivel de Emergencia | Informe        | Temperatura | Frecuencia Cardiaca | Frecuencia Respiratoria | Tension Arterial |
+            | 27-98765432-1 | Sofia   | Martinez | Swiss Medical  | Emergencia         | Dolor toracico | 36.5        | 80                  | 18                      | 120/80           |
+        Then La lista de espera queda ordenada por prioridad de llegada de la siguiente manera:
+            | Cuil          |
+            | 20-12345678-9 |
+            | 27-98765432-1 |
+        And el ingreso del paciente con cuil "27-98765432-1" queda registrado con estado "PENDIENTE"
