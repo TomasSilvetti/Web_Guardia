@@ -49,30 +49,30 @@ class TensionArterial:
 
 class NivelEmergencia(Enum):
     """Enum para los niveles de emergencia según protocolo de triaje"""
-    URGENCIA = {
-        "nivel": 1,
-        "nombre": "Urgencia",
-        "duracionMaxEspera": timedelta(hours=2)
-    }
-    EMERGENCIA = {
-        "nivel": 2,
-        "nombre": "Emergencia",
-        "duracionMaxEspera": timedelta(minutes=30)
-    }
-    SIN_URGENCIA = {
-        "nivel": 3,
-        "nombre": "Sin Urgencia",
-        "duracionMaxEspera": timedelta(hours=4)
-    }
-    URGENCIA_MENOR = {
-        "nivel": 4,
-        "nombre": "Urgencia Menor",
-        "duracionMaxEspera": timedelta(hours=6)
-    }
     CRITICA = {
         "nivel": 0,
         "nombre": "Critica",
-        "duracionMaxEspera": timedelta(minutes=0)
+        "duracionMaxEspera": timedelta(minutes=5)
+    }
+    EMERGENCIA = {
+        "nivel": 1,
+        "nombre": "Emergencia",
+        "duracionMaxEspera": timedelta(minutes=30)
+    }
+    URGENCIA = {
+        "nivel": 2,
+        "nombre": "Urgencia",
+        "duracionMaxEspera": timedelta(hours=1)
+    }
+    URGENCIA_MENOR = {
+        "nivel": 3,
+        "nombre": "Urgencia Menor",
+        "duracionMaxEspera": timedelta(hours=2)
+    }
+    SIN_URGENCIA = {
+        "nivel": 4,
+        "nombre": "Sin Urgencia",
+        "duracionMaxEspera": timedelta(hours=4)
     }
 
 
