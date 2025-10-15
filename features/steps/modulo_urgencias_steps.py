@@ -600,8 +600,8 @@ def step_impl(context):
         except Exception as e:
             excepcion_esperada = e
             print(f"\n[DEBUG register failed] error={str(e)}")
-            raise  # Re-lanzar para que behave muestre el error real
-            break  # (unreachable after raise)
+            raise  
+            break  
 
 
 @then('La lista de espera queda ordenada por prioridad de llegada de la siguiente manera:')
@@ -614,24 +614,21 @@ def step_impl(context):
     ingresos_pendientes = servicio_urgencias.obtener_ingresos_pendientes()
     cuils_actuales = [ingreso.cuil_paciente for ingreso in ingresos_pendientes]
 
-    # Filtrar sólo los ingresos que aparecen en la tabla esperada (manteniendo su orden actual)
+    # Filtrar sólo los ingresos que aparecen en la tabla 
     cuils_actuales_filtrados = [c for c in cuils_actuales if c in cuils_esperados]
 
-    # Debug
-    print(f"\n[DEBUG - llegada] Esperado: {cuils_esperados}")
-    print(f"[DEBUG - llegada] Actual filtered: {cuils_actuales_filtrados}")
 
     assert len(cuils_actuales_filtrados) >= len(cuils_esperados), \
         f"Expected at least {len(cuils_esperados)} matching entries, but got {len(cuils_actuales_filtrados)}. Actual: {cuils_actuales_filtrados}"
 
-    # Comprobar que los CUILs esperados están en el mismo orden relativo en la lista actual
+   
     idx = 0
     for expected in cuils_esperados:
         try:
             pos = cuils_actuales_filtrados.index(expected)
         except ValueError:
             raise AssertionError(f"Expected CUIL {expected} not found in actual pending list")
-        # ensure ordering: previous expected should be before current
+        
         if pos < idx:
             raise AssertionError(f"Expected CUIL order violated: {cuils_esperados}")
         idx = pos + 1
@@ -646,10 +643,6 @@ def step_impl(context):
     # Obtener los ingresos pendientes ordenados por prioridad de emergencia y llegada
     ingresos_pendientes = servicio_urgencias.obtener_ingresos_pendientes()
     cuils_actuales = [ingreso.cuil_paciente for ingreso in ingresos_pendientes]
-
-    # Debug
-    print(f"[DEBUG] CUILs esperados: {cuils_esperados}")
-    print(f"[DEBUG] CUILs actuales: {cuils_actuales}")
 
     # Verificar que la lista actual respete el orden esperado
     assert cuils_actuales[:len(cuils_esperados)] == cuils_esperados, (
