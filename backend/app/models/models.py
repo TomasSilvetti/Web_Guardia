@@ -94,11 +94,23 @@ class ObraSocial:
         self.nombre = nombre
 
 
+class Afiliado:
+    """Entidad para afiliación de paciente a obra social"""
+    def __init__(self, obra_social: ObraSocial, numero_afiliado: str):
+        if not obra_social:
+            raise ValueError("La obra social es obligatoria")
+        if not numero_afiliado or not isinstance(numero_afiliado, str):
+            raise ValueError("El número de afiliado es obligatorio")
+        self.obra_social = obra_social
+        self.numero_afiliado = numero_afiliado
+
+
 class Domicilio:
     """Entidad para domicilio"""
-    def __init__(self, calle: str, numero: str, ciudad: str, provincia: str, pais: str):
+    def __init__(self, calle: str, numero: int, localidad: str, ciudad: str, provincia: str, pais: str):
         self.calle = calle
         self.numero = numero
+        self.localidad = localidad
         self.ciudad = ciudad
         self.provincia = provincia
         self.pais = pais
@@ -123,17 +135,26 @@ class Paciente(Persona):
         nombre: str,
         apellido: str,
         cuil: str,
-        obra_social: str,
-        domicilio: Optional[Domicilio] = None,
+        domicilio: Domicilio,
+        afiliado: Optional['Afiliado'] = None,
         email: str = ""
     ):
+        # Validar formato CUIL (XX-XXXXXXXX-X)
+        if not cuil or not isinstance(cuil, str):
+            raise ValueError("El CUIL es obligatorio")
+        
+        # Eliminar guiones para validar
+        cuil_limpio = cuil.replace("-", "")
+        if not cuil_limpio.isdigit() or len(cuil_limpio) != 11:
+            raise ValueError("El CUIL debe tener el formato XX-XXXXXXXX-X (11 dígitos)")
+        
         super().__init__(cuil, nombre, apellido, email)
-        # Para mantener compatibilidad con tests, aceptamos string
-        if isinstance(obra_social, str):
-            self.obra_social = ObraSocial(obra_social)
-        else:
-            self.obra_social = obra_social
+        
+        if not domicilio:
+            raise ValueError("El domicilio es obligatorio")
+        
         self.domicilio = domicilio
+        self.afiliado = afiliado
 
 
 class Doctor(Persona):
