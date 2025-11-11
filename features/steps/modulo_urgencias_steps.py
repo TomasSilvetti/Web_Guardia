@@ -627,10 +627,10 @@ def step_impl(context):
         try:
             pos = cuils_actuales_filtrados.index(expected)
         except ValueError:
-            raise AssertionError(f"Expected CUIL {expected} not found in actual pending list")
+            raise AssertionError(f"El cuil {expected} no se encuentra en la lista de espera")
         
         if pos < idx:
-            raise AssertionError(f"Expected CUIL order violated: {cuils_esperados}")
+            raise AssertionError(f"Los cuils no estan en el orden correcto: {cuils_esperados}")
         idx = pos + 1
 
 @then("La lista de espera debe mantener al paciente B antes que el paciente A, aun cuando ambos tengan el mismo nivel de emergencia:")

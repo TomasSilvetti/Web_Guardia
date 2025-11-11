@@ -172,6 +172,7 @@ class Usuario:
         self.password_hash = self._hash_password(password)
         # rol por defecto no asignado; puede asignarse con set_rol o pasarse al constructor
         self.rol = None
+        self.id = None  # ID será asignado por el repositorio
         if rol is not None:
             # delega la validación y normalización a set_rol
             self.set_rol(rol)
