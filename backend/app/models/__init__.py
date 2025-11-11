@@ -14,6 +14,7 @@ from .models import (
     Atencion,
     Usuario,
     ObraSocial,
+    Afiliado,
     Domicilio
 )
 
@@ -33,5 +34,6 @@ __all__ = [
     'Atencion',
     'Usuario',
     'ObraSocial',
+    'Afiliado',
     'Domicilio'
 ]
