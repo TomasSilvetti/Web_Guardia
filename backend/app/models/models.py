@@ -1,6 +1,9 @@
 from enum import Enum
 from datetime import datetime, timedelta
 from typing import Optional
+import re
+
+import bcrypt
 
 
 # ============= Value Objects =============
@@ -149,10 +152,64 @@ class Enfermera(Persona):
 
 
 class Usuario:
-    """Entidad para usuario del sistema"""
-    def __init__(self, usuario: str, password: str):
-        self.usuario = usuario
+    """Entidad para usuario del sistema
+
+    Ahora el constructor acepta un parámetro opcional `rol` (miembro de `Rol` o `str`).
+    """
+    def __init__(self, email: str, password: str, rol: Optional[object] = None):
+        # Validaciones básicas por historia de usuario IS2025-005
+        if not email or not isinstance(email, str):
+            raise ValueError("El email es obligatorio")
+        # simple validación de formato de email
+        if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+            raise ValueError("El email no tiene un formato válido")
+
+        if not password or not isinstance(password, str) or len(password) < 8:
+            raise ValueError("La contraseña debe tener al menos 8 caracteres")
+
+        self.email = email
         self.password = password
+        self.password_hash = self._hash_password(password)
+        # rol por defecto no asignado; puede asignarse con set_rol o pasarse al constructor
+        self.rol = None
+        if rol is not None:
+            # delega la validación y normalización a set_rol
+            self.set_rol(rol)
+
+    def set_rol(self, rol):
+        """Asigna el rol al usuario. Acepta un miembro de `Rol` o un string.
+
+        Ejemplos válidos: Rol.MEDICO, "Medico", "medico", "ENFERMERA".
+        """
+        if isinstance(rol, Rol):
+            self.rol = rol
+            return
+
+        if isinstance(rol, str):
+            key = rol.strip().lower()
+            if key.startswith("med"):
+                self.rol = Rol.MEDICO
+                return
+            if key.startswith("enf"):
+                self.rol = Rol.ENFERMERA
+                return
+
+        raise ValueError("El rol debe ser un miembro de Rol o una cadena 'Medico'/'Enfermera'")
+
+    def _hash_password(self, password: str) -> str:
+        """Hashea la contraseña usando bcrypt"""
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+
+    def verificar_password(self, password: str) -> bool:
+        """Verifica si el password coincide con el hash guardado"""
+        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+
+class Rol(Enum):
+    MEDICO = "Medico"
+    ENFERMERA = "Enfermera"
+
+
 
 
 class Atencion:
