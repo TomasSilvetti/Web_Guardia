@@ -194,6 +194,7 @@ class Usuario:
         # rol por defecto no asignado; puede asignarse con set_rol o pasarse al constructor
         self.rol = None
         self.id = None  # ID será asignado por el repositorio
+        self.matricula = None
         if rol is not None:
             # delega la validación y normalización a set_rol
             self.set_rol(rol)
@@ -228,8 +229,8 @@ class Usuario:
         return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
 
 class Rol(Enum):
-    MEDICO = "Medico"
-    ENFERMERA = "Enfermera"
+    MEDICO = "MEDICO"
+    ENFERMERA = "ENFERMERA"
 
 
 

@@ -33,7 +33,8 @@ class ServicioEmergencias:
         frecuencia_diastolica: Optional[float],
         nombre: Optional[str],
         apellido: Optional[str],
-        obra_social: Optional[str]
+        obra_social: Optional[str],
+        domicilio: Optional[dict] = None
     ) -> Tuple[Ingreso, Optional[str]]:
         """
         Registra un ingreso de urgencia de un paciente.
@@ -57,6 +58,7 @@ class ServicioEmergencias:
             nombre: Nombre del paciente (requerido si el paciente no existe)
             apellido: Apellido del paciente (requerido si el paciente no existe)
             obra_social: Obra social del paciente (requerido si el paciente no existe)
+            domicilio: Domicilio del paciente (requerido si el paciente no existe)
 
         Returns:
             Tupla (ingreso_creado, mensaje_advertencia)
@@ -105,9 +107,30 @@ class ServicioEmergencias:
             if obra_social is None:
                 raise ValueError("El campo obra social es obligatorio")
 
+            if domicilio is None:
+                raise ValueError("El campo domicilio es obligatorio para crear un paciente nuevo")
+
             # Crear el paciente automáticamente
             mensaje_advertencia = "El paciente no existe en el sistema y debe ser registrado antes de proceder al ingreso"
-            paciente = Paciente(nombre, apellido, cuil, obra_social)
+            
+            # Crear objeto Domicilio
+            from backend.app.models.models import Domicilio, ObraSocial, Afiliado
+            domicilio_obj = Domicilio(
+                calle=domicilio.get('calle'),
+                numero=domicilio.get('numero'),
+                localidad=domicilio.get('localidad'),
+                ciudad=domicilio.get('ciudad'),
+                provincia=domicilio.get('provincia'),
+                pais=domicilio.get('pais')
+            )
+            
+            # Crear obra social y afiliado si se proporcionó
+            afiliado = None
+            if obra_social:
+                obra_social_obj = ObraSocial(obra_social)
+                afiliado = Afiliado(obra_social_obj, "000000")  # número de afiliado temporal
+            
+            paciente = Paciente(nombre, apellido, cuil, domicilio_obj, afiliado)
             self.pacientes_repo.guardar_paciente(paciente)
 
         # Crear value objects (aquí se validan los valores)
