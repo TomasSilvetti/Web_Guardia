@@ -45,11 +45,11 @@ function App() {
             {/* Ruta de login */}
             <Route path="/login" element={<LoginPage />} />
             
-            {/* Ruta protegida de urgencias (solo enfermeras) */}
+            {/* Ruta protegida de urgencias (enfermeras y médicos) */}
             <Route
               path="/urgencias"
               element={
-                <ProtectedRoute requireEnfermera={true}>
+                <ProtectedRoute allowedRoles={['ENFERMERA', 'MEDICO']}>
                   <UrgenciasPage />
                 </ProtectedRoute>
               }

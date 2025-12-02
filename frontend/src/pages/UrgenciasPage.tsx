@@ -17,22 +17,18 @@ export const UrgenciasPage: React.FC = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-      <Navbar />
-      
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Grid container spacing={3}>
-          {/* Formulario de admisión */}
-          <Grid item xs={12} lg={6}>
-            <FormularioAdmision onSuccess={handleIngresoSuccess} />
-          </Grid>
+  <Navbar />
+  
+  {/* Formulario en container */}
+  <Container maxWidth="xl" sx={{ py: 4 }}>
+    <FormularioAdmision onSuccess={handleIngresoSuccess} />
+  </Container>
 
-          {/* Lista de espera */}
-          <Grid item xs={12} lg={6}>
-            <ListaEspera refreshTrigger={refreshTrigger} />
-          </Grid>
-        </Grid>
-      </Container>
-    </Box>
+  {/* Lista de espera ocupando todo el ancho */}
+  <Box sx={{ px: 9, pb: 4 }}>
+    <ListaEspera refreshTrigger={refreshTrigger} />
+  </Box>
+</Box>
   );
 };
 

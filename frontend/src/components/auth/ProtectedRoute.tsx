@@ -9,11 +9,13 @@ import { useAuth } from '../../hooks/useAuth';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireEnfermera?: boolean;
+  allowedRoles?: string[];
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  requireEnfermera = false 
+  requireEnfermera = false,
+  allowedRoles = []
 }) => {
   const { isAuthenticated, isLoading, user } = useAuth();
 
@@ -34,6 +36,23 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Si no está autenticado, redirigir al login
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Si se especifican roles permitidos, verificar que el usuario tenga uno de ellos
+  if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.rol)) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+        flexDirection="column"
+        gap={2}
+      >
+        <h2>Acceso Denegado</h2>
+        <p>No tienes permisos para acceder a esta sección.</p>
+      </Box>
+    );
   }
 
   // Si se requiere rol de enfermera y el usuario no lo tiene
@@ -57,5 +76,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 };
 
 export default ProtectedRoute;
+
 
 

@@ -206,3 +206,4 @@ export const SignosVitales: React.FC<SignosVitalesProps> = ({
 export default SignosVitales;
 
 
+
