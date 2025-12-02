@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
 
 from backend.app.core.security import decode_access_token
-from backend.app.models.models import Usuario, Enfermera, Rol
+from backend.app.models.models import Usuario, Enfermera, Doctor, Rol
 from backend.app.services.auth_service import InMemoryUserRepo
 from backend.app.repositories.paciente_repo_impl import InMemoryPacientesRepo
 from backend.app.services.servicio_emergencias import ServicioEmergencias
@@ -134,4 +134,37 @@ def get_current_enfermera(
     )
     
     return enfermera
+
+
+def get_current_medico(
+    current_user: Usuario = Depends(get_current_user)
+) -> Doctor:
+    """
+    Valida que el usuario autenticado sea un médico.
+    
+    Args:
+        current_user: Usuario autenticado
+        
+    Returns:
+        Objeto Doctor con los datos del usuario
+        
+    Raises:
+        HTTPException 403: Si el usuario no es médico
+    """
+    if current_user.rol != Rol.MEDICO:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No tiene permisos para realizar esta acción. Solo médicos pueden reclamar pacientes."
+        )
+    
+    # Crear objeto Doctor a partir del Usuario
+    doctor = Doctor(
+        cuil="",
+        nombre=current_user.email.split("@")[0],  # Usar parte del email como nombre temporal
+        apellido="",
+        matricula=current_user.matricula,
+        email=current_user.email
+    )
+    
+    return doctor
 

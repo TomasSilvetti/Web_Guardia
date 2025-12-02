@@ -1,5 +1,5 @@
 /**
- * Lista de pacientes en espera ordenada por prioridad
+ * Lista de pacientes en revisión (estado EN_PROCESO)
  */
 import React, { useEffect, useState } from 'react';
 import {
@@ -12,27 +12,25 @@ import {
   Divider
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import PeopleIcon from '@mui/icons-material/People';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import { useNavigate } from 'react-router-dom';
 import { TarjetaPaciente } from './TarjetaPaciente';
 import { useUrgencias } from '../../hooks/useUrgencias';
+import { isMedico } from '../../services/authService';
 import type { IngresoListItem } from '../../services/urgenciasService';
 
-interface ListaEsperaProps {
+interface ListaRevisionEnProcesoProps {
   refreshTrigger?: number;
-  showReclamarButton?: boolean;
-  onReclamar?: (ingresoId: string) => void;
 }
 
-export const ListaEspera: React.FC<ListaEsperaProps> = ({ 
-  refreshTrigger = 0,
-  showReclamarButton = false,
-  onReclamar
-}) => {
-  const { obtenerPendientes, loading, error } = useUrgencias();
+export const ListaRevisionEnProceso: React.FC<ListaRevisionEnProcesoProps> = ({ refreshTrigger = 0 }) => {
+  const navigate = useNavigate();
+  const { obtenerEnProceso, loading, error } = useUrgencias();
   const [ingresos, setIngresos] = useState<IngresoListItem[]>([]);
+  const esMedico = isMedico();
 
   const cargarIngresos = async () => {
-    const data = await obtenerPendientes();
+    const data = await obtenerEnProceso();
     setIngresos(data);
   };
 
@@ -49,13 +47,17 @@ export const ListaEspera: React.FC<ListaEsperaProps> = ({
     return () => clearInterval(interval);
   }, []);
 
+  const handleContinuar = (ingresoId: string) => {
+    navigate(`/urgencias/revision/${ingresoId}`);
+  };
+
   return (
-    <Paper elevation={3} sx={{ p: 3 }}>
+    <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Box display="flex" alignItems="center" gap={1}>
-          <PeopleIcon color="primary" />
+          <AssignmentIcon color="secondary" />
           <Typography variant="h5">
-            Lista de Espera
+            Revisión en Progreso
           </Typography>
         </Box>
         <Button
@@ -70,7 +72,7 @@ export const ListaEspera: React.FC<ListaEsperaProps> = ({
       </Box>
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Pacientes ordenados por prioridad y hora de llegada
+        Pacientes que están siendo atendidos actualmente
       </Typography>
 
       <Divider sx={{ mb: 3 }} />
@@ -89,23 +91,23 @@ export const ListaEspera: React.FC<ListaEsperaProps> = ({
 
       {!loading && !error && ingresos.length === 0 && (
         <Alert severity="info">
-          No hay pacientes en espera en este momento
+          No hay pacientes en revisión en este momento
         </Alert>
       )}
 
       {!loading && !error && ingresos.length > 0 && (
         <>
-          <Alert severity="info" sx={{ mb: 2 }}>
-            Total de pacientes en espera: <strong>{ingresos.length}</strong>
+          <Alert severity="success" sx={{ mb: 2 }}>
+            Pacientes en revisión: <strong>{ingresos.length}</strong>
           </Alert>
           
           <Box>
-            {ingresos.map((ingreso, index) => (
+            {ingresos.map((ingreso) => (
               <TarjetaPaciente 
                 key={ingreso.id} 
                 ingreso={ingreso}
-                showReclamarButton={showReclamarButton && index === 0}
-                onReclamar={onReclamar}
+                showContinuarButton={esMedico}
+                onContinuar={handleContinuar}
               />
             ))}
           </Box>
@@ -115,6 +117,5 @@ export const ListaEspera: React.FC<ListaEsperaProps> = ({
   );
 };
 
-export default ListaEspera;
-
+export default ListaRevisionEnProceso;
 

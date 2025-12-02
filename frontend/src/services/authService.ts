@@ -95,5 +95,13 @@ export const isEnfermera = (): boolean => {
   return user?.rol === 'ENFERMERA';
 };
 
+/**
+ * Verificar si el usuario es médico
+ */
+export const isMedico = (): boolean => {
+  const user = getCurrentUser();
+  return user?.rol === 'MEDICO';
+};
+
 
 

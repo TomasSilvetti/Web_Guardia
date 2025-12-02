@@ -237,9 +237,15 @@ class Rol(Enum):
 
 class Atencion:
     """Entidad para atención médica"""
-    def __init__(self, doctor: Doctor, informe: str):
+    def __init__(self, doctor: Doctor, informe: str, ingreso: Optional['Ingreso'] = None):
+        if not doctor:
+            raise ValueError("El doctor es obligatorio")
+        if not informe or not isinstance(informe, str) or not informe.strip():
+            raise ValueError("El informe es obligatorio y no puede estar vacío")
+        
         self.doctor = doctor
         self.informe = informe
+        self.ingreso = ingreso
 
 
 class Ingreso:
@@ -256,7 +262,8 @@ class Ingreso:
         frecuencia_respiratoria: FrecuenciaRespiratoria,
         tension_arterial: TensionArterial,
         fecha_ingreso: Optional[datetime] = None,
-        atencion: Optional[Atencion] = None
+        atencion: Optional[Atencion] = None,
+        doctor_asignado: Optional[Doctor] = None
     ):
         self.id = id_uuid
         self.paciente = paciente
@@ -270,6 +277,7 @@ class Ingreso:
         self.fecha_ingreso = fecha_ingreso if fecha_ingreso else datetime.now()
         self.atencion = atencion
         self.estado_ingreso = EstadoIngreso.PENDIENTE
+        self.doctor_asignado = doctor_asignado
 
     @property
     def cuil_paciente(self) -> str:

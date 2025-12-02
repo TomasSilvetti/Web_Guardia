@@ -52,6 +52,27 @@ class DomicilioRequest:
 
 
 @dataclass
+class DomicilioResponse:
+    """Schema para domicilio en respuesta"""
+    calle: str
+    numero: int
+    localidad: str
+    ciudad: str
+    provincia: str
+    pais: str
+
+
+@dataclass
+class PacienteResponse:
+    """Schema para respuesta de búsqueda de paciente"""
+    cuil: str
+    nombre: str
+    apellido: str
+    obra_social: Optional[str]
+    domicilio: DomicilioResponse
+
+
+@dataclass
 class IngresoUrgenciaRequest:
     """Schema para request de registro de ingreso a urgencias"""
     cuil: str
@@ -111,6 +132,64 @@ class NivelEmergenciaItem:
 class ErrorResponse:
     """Schema para respuestas de error"""
     detail: str
+
+
+# ============= Reclamo y Atención Schemas =============
+
+@dataclass
+class ReclamarResponse:
+    """Schema para response al reclamar un paciente"""
+    id: str
+    cuil_paciente: str
+    nombre_paciente: str
+    apellido_paciente: str
+    nivel_emergencia: str
+    estado: str
+    mensaje: str
+
+
+@dataclass
+class AtencionRequest:
+    """Schema para request de registro de atención"""
+    ingreso_id: str
+    informe: str
+
+
+@dataclass
+class AtencionResponse:
+    """Schema para response de atención registrada"""
+    ingreso_id: str
+    estado: str
+    mensaje: str
+
+
+@dataclass
+class IngresoDetalleResponse:
+    """Schema para detalle completo de un ingreso"""
+    id: str
+    # Datos del paciente
+    cuil_paciente: str
+    nombre_paciente: str
+    apellido_paciente: str
+    # Datos del ingreso
+    nivel_emergencia: str
+    nivel_emergencia_nombre: str
+    estado: str
+    fecha_ingreso: str
+    descripcion: str
+    # Signos vitales
+    temperatura: float
+    frecuencia_cardiaca: float
+    frecuencia_respiratoria: float
+    frecuencia_sistolica: float
+    frecuencia_diastolica: float
+    # Datos de enfermera
+    enfermera_nombre: str
+    enfermera_apellido: str
+    # Atención (si existe)
+    atencion_informe: Optional[str] = None
+    atencion_doctor_nombre: Optional[str] = None
+    atencion_doctor_apellido: Optional[str] = None
 
 
 # ============= Health Check Schema =============
