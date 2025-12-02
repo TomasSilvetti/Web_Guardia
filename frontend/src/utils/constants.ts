@@ -56,7 +56,7 @@ export const ESTADOS_INGRESO = {
 // Roles de usuario
 export const ROLES = {
   ENFERMERA: 'ENFERMERA',
-  DOCTOR: 'DOCTOR',
+  DOCTOR: 'MEDICO',
   ADMIN: 'ADMIN'
 } as const;
 
@@ -87,5 +87,6 @@ export const RANGOS_SIGNOS_VITALES = {
   tensionSistolica: { min: 90, max: 120, unidad: 'mmHg' },
   tensionDiastolica: { min: 60, max: 80, unidad: 'mmHg' }
 } as const;
+
 
 
