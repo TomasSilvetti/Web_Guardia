@@ -1,0 +1,65 @@
+name: Backend Tests
+
+# Define cuándo se ejecutará el workflow
+on:
+  # Se ejecuta en Pull Requests hacia la rama principal
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-tests.yml'
+  
+  # Se ejecuta en push a la rama principal
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-tests.yml'
+  
+  # Permite ejecución manual desde la UI de GitHub
+  workflow_dispatch:
+
+# Define los trabajos a ejecutar
+jobs:
+  test:
+    # Nombre descriptivo del job
+    name: Ejecutar Tests del Backend
+    
+    # Sistema operativo donde se ejecutará
+    runs-on: ubuntu-latest
+    
+    # Pasos a ejecutar
+    steps:
+      # 1. Checkout del código
+      - name: Checkout código
+        uses: actions/checkout@v4
+      
+      # 2. Configurar Python
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      # 3. Instalar dependencias
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+      
+      # 4. Ejecutar tests con pytest
+      - name: Ejecutar tests
+        run: |
+          cd backend
+          python -m pytest app/test/ -v --tb=short
+      
+      # 5. Generar reporte de cobertura
+      - name: Generar reporte de cobertura
+        if: always()
+        run: |
+          cd backend
+          pip install pytest-cov
+          python -m pytest app/test/ --cov=app --cov-report=term-missing
+
