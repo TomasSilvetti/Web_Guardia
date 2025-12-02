@@ -59,7 +59,7 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
   const [success, setSuccess] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
 
-  const buscarPaciente = () => {
+  const buscarPaciente = async () => {
     setErrors({});
     setSuccess(null);
     setWarning(null);
@@ -76,10 +76,32 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
       return;
     }
 
-    // Por ahora, simulamos que el paciente no existe
-    // Cuando se implemente IS2025-002, aquí se hará la búsqueda real
-    setPacienteExiste(false);
-    setWarning('El paciente no existe en el sistema. Complete los datos adicionales para registrarlo.');
+    try {
+      // Importar función de servicio
+      const { buscarPacientePorCuil } = await import('../../services/urgenciasService');
+      const paciente = await buscarPacientePorCuil(cuil.replace(/[-\s]/g, ''));
+      
+      if (paciente) {
+        // Paciente encontrado - autocompletar datos
+        setPacienteExiste(true);
+        setNombre(paciente.nombre);
+        setApellido(paciente.apellido);
+        setObraSocial(paciente.obra_social || '');
+        setCalle(paciente.domicilio.calle);
+        setNumero(paciente.domicilio.numero.toString());
+        setLocalidad(paciente.domicilio.localidad);
+        setCiudad(paciente.domicilio.ciudad);
+        setProvincia(paciente.domicilio.provincia);
+        setPais(paciente.domicilio.pais);
+        setSuccess('Paciente encontrado. Los datos han sido autocompletados.');
+      } else {
+        // Paciente no existe
+        setPacienteExiste(false);
+        setWarning('El paciente no existe en el sistema. Complete los datos adicionales para registrarlo.');
+      }
+    } catch (error) {
+      setErrors({ cuil: 'Error al buscar paciente' });
+    }
   };
 
   const validarFormulario = (): boolean => {
@@ -307,7 +329,7 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
                     onChange={(e) => setNombre(e.target.value)}
                     error={!!errors.nombre}
                     helperText={errors.nombre}
-                    disabled={loading}
+                    disabled={pacienteExiste === true || loading}
                     required
                   />
                 </Grid>
@@ -319,7 +341,7 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
                     onChange={(e) => setApellido(e.target.value)}
                     error={!!errors.apellido}
                     helperText={errors.apellido}
-                    disabled={loading}
+                    disabled={pacienteExiste === true || loading}
                     required
                   />
                 </Grid>
@@ -331,7 +353,7 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
                     onChange={(e) => setObraSocial(e.target.value)}
                     error={!!errors.obra_social}
                     helperText={errors.obra_social}
-                    disabled={loading}
+                    disabled={pacienteExiste === true || loading}
                     required
                   />
                 </Grid>
@@ -350,7 +372,7 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
                     onChange={(e) => setCalle(e.target.value)}
                     error={!!errors.calle}
                     helperText={errors.calle}
-                    disabled={loading}
+                    disabled={pacienteExiste === true || loading}
                     required
                   />
                 </Grid>
@@ -363,7 +385,7 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
                     onChange={(e) => setNumero(e.target.value)}
                     error={!!errors.numero}
                     helperText={errors.numero}
-                    disabled={loading}
+                    disabled={pacienteExiste === true || loading}
                     required
                   />
                 </Grid>
@@ -375,7 +397,7 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
                     onChange={(e) => setLocalidad(e.target.value)}
                     error={!!errors.localidad}
                     helperText={errors.localidad}
-                    disabled={loading}
+                    disabled={pacienteExiste === true || loading}
                     required
                   />
                 </Grid>
@@ -387,7 +409,7 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
                     onChange={(e) => setCiudad(e.target.value)}
                     error={!!errors.ciudad}
                     helperText={errors.ciudad}
-                    disabled={loading}
+                    disabled={pacienteExiste === true || loading}
                     required
                   />
                 </Grid>
@@ -399,7 +421,7 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
                     onChange={(e) => setProvincia(e.target.value)}
                     error={!!errors.provincia}
                     helperText={errors.provincia}
-                    disabled={loading}
+                    disabled={pacienteExiste === true || loading}
                     required
                   />
                 </Grid>
@@ -411,7 +433,7 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
                     onChange={(e) => setPais(e.target.value)}
                     error={!!errors.pais}
                     helperText={errors.pais}
-                    disabled={loading}
+                    disabled={pacienteExiste === true || loading}
                     required
                   />
                 </Grid>

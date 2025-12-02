@@ -8,7 +8,10 @@ from backend.app.models.models import (
     FrecuenciaCardiaca,
     FrecuenciaRespiratoria,
     TensionArterial,
-    Ingreso
+    Ingreso,
+    Doctor,
+    Atencion,
+    EstadoIngreso
 )
 from backend.app.interfaces.pacientes_repo import PacientesRepo
 
@@ -19,6 +22,8 @@ class ServicioEmergencias:
     def __init__(self, pacientes_repo: PacientesRepo):
         self.pacientes_repo = pacientes_repo
         self._ingresos_pendientes: List[Ingreso] = []
+        self._ingresos_en_proceso: List[Ingreso] = []
+        self._ingresos_finalizados: List[Ingreso] = []
     
     def registrar_urgencia(
         self,
@@ -190,3 +195,134 @@ class ServicioEmergencias:
         ingreso = self._ingresos_pendientes.pop(0)
         ingreso.estado_ingreso = ingreso.estado_ingreso.__class__.EN_PROCESO
         return ingreso
+    
+    def reclamar_siguiente_paciente(self, doctor: Doctor) -> Ingreso:
+        """
+        Reclama el siguiente paciente en la lista de espera para ser atendido por un médico.
+        
+        Cambia el estado del ingreso de PENDIENTE a EN_PROCESO y lo mueve a la lista
+        de ingresos en proceso.
+        
+        Args:
+            doctor: Médico que reclama el paciente
+            
+        Returns:
+            El ingreso reclamado
+            
+        Raises:
+            ValueError: Si no hay pacientes en la lista de espera o si el doctor ya tiene un paciente en revisión
+        """
+        if not doctor:
+            raise ValueError("El doctor es obligatorio")
+        
+        # Verificar que el doctor no tenga otro paciente en proceso
+        for ingreso in self._ingresos_en_proceso:
+            if ingreso.doctor_asignado and ingreso.doctor_asignado.email == doctor.email:
+                raise ValueError(
+                    f"El doctor ya tiene un paciente en revisión. "
+                    f"Debe finalizar la atención del paciente {ingreso.paciente.nombre} "
+                    f"{ingreso.paciente.apellido} antes de reclamar otro."
+                )
+        
+        if not self._ingresos_pendientes:
+            raise ValueError("No hay pacientes en la lista de espera")
+        
+        # Obtener el primer paciente (mayor prioridad)
+        ingreso = self._ingresos_pendientes.pop(0)
+        
+        # Cambiar estado a EN_PROCESO
+        ingreso.estado_ingreso = EstadoIngreso.EN_PROCESO
+        
+        # Asignar doctor al ingreso
+        ingreso.doctor_asignado = doctor
+        
+        # Agregar a lista de ingresos en proceso
+        self._ingresos_en_proceso.append(ingreso)
+        
+        return ingreso
+    
+    def obtener_ingresos_en_proceso(self) -> List[Ingreso]:
+        """
+        Obtiene la lista de ingresos que están siendo atendidos (estado EN_PROCESO).
+        
+        Returns:
+            Lista de ingresos en proceso
+        """
+        return self._ingresos_en_proceso.copy()
+    
+    def registrar_atencion(self, ingreso_id: str, doctor: Doctor, informe: str) -> Atencion:
+        """
+        Registra la atención médica de un paciente y finaliza el ingreso.
+        
+        Valida que el informe no esté vacío, crea la atención asociada al doctor
+        e ingreso, cambia el estado del ingreso a FINALIZADO y lo mueve a la lista
+        de ingresos finalizados.
+        
+        Args:
+            ingreso_id: ID del ingreso a atender
+            doctor: Médico que registra la atención
+            informe: Informe de atención (mandatorio)
+            
+        Returns:
+            La atención creada
+            
+        Raises:
+            ValueError: Si el informe está vacío o el ingreso no existe/no está en proceso
+        """
+        if not informe or not informe.strip():
+            raise ValueError("El informe del paciente se ha omitido")
+        
+        if not doctor:
+            raise ValueError("El doctor es obligatorio")
+        
+        # Buscar el ingreso en la lista de ingresos en proceso
+        ingreso = None
+        for ing in self._ingresos_en_proceso:
+            if ing.id == ingreso_id:
+                ingreso = ing
+                break
+        
+        if not ingreso:
+            raise ValueError("El ingreso no existe o no está en proceso")
+        
+        # Crear la atención
+        atencion = Atencion(doctor=doctor, informe=informe, ingreso=ingreso)
+        
+        # Asociar la atención al ingreso
+        ingreso.atencion = atencion
+        
+        # Cambiar estado a FINALIZADO
+        ingreso.estado_ingreso = EstadoIngreso.FINALIZADO
+        
+        # Mover de en_proceso a finalizados
+        self._ingresos_en_proceso.remove(ingreso)
+        self._ingresos_finalizados.append(ingreso)
+        
+        return atencion
+    
+    def obtener_ingreso_por_id(self, ingreso_id: str) -> Optional[Ingreso]:
+        """
+        Obtiene un ingreso por su ID, buscando en todas las listas.
+        
+        Args:
+            ingreso_id: ID del ingreso a buscar
+            
+        Returns:
+            El ingreso encontrado o None si no existe
+        """
+        # Buscar en pendientes
+        for ingreso in self._ingresos_pendientes:
+            if ingreso.id == ingreso_id:
+                return ingreso
+        
+        # Buscar en proceso
+        for ingreso in self._ingresos_en_proceso:
+            if ingreso.id == ingreso_id:
+                return ingreso
+        
+        # Buscar en finalizados
+        for ingreso in self._ingresos_finalizados:
+            if ingreso.id == ingreso_id:
+                return ingreso
+        
+        return None

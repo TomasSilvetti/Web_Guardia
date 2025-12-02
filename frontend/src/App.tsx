@@ -8,6 +8,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
 import { UrgenciasPage } from './pages/UrgenciasPage';
+import { RevisionPacientePage } from './pages/RevisionPacientePage';
 
 // Crear tema de Material UI
 const theme = createTheme({
@@ -51,6 +52,16 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={['ENFERMERA', 'MEDICO']}>
                   <UrgenciasPage />
+                </ProtectedRoute>
+              }
+            />
+            
+            {/* Ruta protegida de revisión de paciente (solo médicos) */}
+            <Route
+              path="/urgencias/revision/:id"
+              element={
+                <ProtectedRoute allowedRoles={['MEDICO']}>
+                  <RevisionPacientePage />
                 </ProtectedRoute>
               }
             />

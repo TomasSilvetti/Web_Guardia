@@ -9,21 +9,35 @@ import {
   Box,
   Chip,
   Grid,
-  Divider
+  Divider,
+  Button,
+  CardActions
 } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import AirIcon from '@mui/icons-material/Air';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import EditNoteIcon from '@mui/icons-material/EditNote';
 import { NIVELES_EMERGENCIA } from '../../utils/constants';
 import type { IngresoListItem } from '../../services/urgenciasService';
 
 interface TarjetaPacienteProps {
   ingreso: IngresoListItem;
+  showReclamarButton?: boolean;
+  showContinuarButton?: boolean;
+  onReclamar?: (ingresoId: string) => void;
+  onContinuar?: (ingresoId: string) => void;
 }
 
-export const TarjetaPaciente: React.FC<TarjetaPacienteProps> = ({ ingreso }) => {
+export const TarjetaPaciente: React.FC<TarjetaPacienteProps> = ({ 
+  ingreso,
+  showReclamarButton = false,
+  showContinuarButton = false,
+  onReclamar,
+  onContinuar
+}) => {
   // Obtener información del nivel de emergencia
   const nivelInfo = Object.values(NIVELES_EMERGENCIA).find(
     n => n.valor === ingreso.nivel_emergencia
@@ -153,6 +167,34 @@ export const TarjetaPaciente: React.FC<TarjetaPacienteProps> = ({ ingreso }) => 
           />
         </Box>
       </CardContent>
+
+      {/* Botones de acción */}
+      {(showReclamarButton || showContinuarButton) && (
+        <CardActions sx={{ justifyContent: 'flex-end', pt: 0 }}>
+          {showReclamarButton && onReclamar && (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<PersonAddIcon />}
+              onClick={() => onReclamar(ingreso.id)}
+              size="medium"
+            >
+              Reclamar Paciente
+            </Button>
+          )}
+          {showContinuarButton && onContinuar && (
+            <Button
+              variant="contained"
+              color="secondary"
+              startIcon={<EditNoteIcon />}
+              onClick={() => onContinuar(ingreso.id)}
+              size="medium"
+            >
+              Continuar Revisión
+            </Button>
+          )}
+        </CardActions>
+      )}
     </Card>
   );
 };
