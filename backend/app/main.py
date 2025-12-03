@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 
 from backend.app.core.config import settings
-from backend.app.api.routes import auth, urgencias
+from backend.app.api.routes import auth, urgencias, debug
 
 
 # Crear instancia de FastAPI
@@ -28,6 +28,7 @@ app.add_middleware(
 # Incluir routers
 app.include_router(auth.router, prefix=f"{settings.API_PREFIX}/auth", tags=["auth"])
 app.include_router(urgencias.router, prefix=f"{settings.API_PREFIX}/urgencias", tags=["urgencias"])
+app.include_router(debug.router, prefix=f"{settings.API_PREFIX}/debug", tags=["debug"])
 
 
 # Endpoints raíz
@@ -46,6 +47,7 @@ def root():
         "endpoints": {
             "auth": f"{settings.API_PREFIX}/auth",
             "urgencias": f"{settings.API_PREFIX}/urgencias",
+            "debug": f"{settings.API_PREFIX}/debug",
             "health": "/health",
             "docs": "/docs"
         }

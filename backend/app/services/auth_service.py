@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from ..models.models import Usuario, Rol
 
 
@@ -16,6 +16,55 @@ class InMemoryUserRepo:
 
     def save(self, user: Usuario) -> None:
         self._store[user.email] = user
+
+    def get_all(self) -> List[Usuario]:
+        """Retorna todos los usuarios almacenados en memoria"""
+        return list(self._store.values())
+
+    def get_all_by_rol(self, rol: Rol) -> List[Usuario]:
+        """Retorna todos los usuarios de un rol específico (MEDICO o ENFERMERA)"""
+        return [user for user in self._store.values() if user.rol == rol]
+
+    def count(self) -> int:
+        """Retorna la cantidad total de usuarios en memoria"""
+        return len(self._store)
+
+    def print_all_users(self) -> None:
+        """Imprime información detallada de todos los usuarios en memoria"""
+        if not self._store:
+            print("No hay usuarios registrados en memoria.")
+            return
+
+        print(f"\n{'='*80}")
+        print(f"USUARIOS EN MEMORIA - Total: {len(self._store)}")
+        print(f"{'='*80}\n")
+
+        medicos = [u for u in self._store.values() if u.rol == Rol.MEDICO]
+        enfermeras = [u for u in self._store.values() if u.rol == Rol.ENFERMERA]
+
+        if medicos:
+            print(f"--- MÉDICOS ({len(medicos)}) ---")
+            for user in medicos:
+                print(f"  📧 Email: {user.email}")
+                print(f"     Rol: {user.rol.value}")
+                print(f"     ID: {user.id}")
+                print(f"     Matrícula: {user.matricula if user.matricula else 'N/A'}")
+                print(f"     Password hash: {user.password_hash[:60]}...")
+                print(f"     ✅ Contraseña hasheada correctamente (no se guarda en texto plano)")
+                print()
+
+        if enfermeras:
+            print(f"--- ENFERMERAS ({len(enfermeras)}) ---")
+            for user in enfermeras:
+                print(f"  📧 Email: {user.email}")
+                print(f"     Rol: {user.rol.value}")
+                print(f"     ID: {user.id}")
+                print(f"     Matrícula: {user.matricula if user.matricula else 'N/A'}")
+                print(f"     Password hash: {user.password_hash[:60]}...")
+                print(f"     ✅ Contraseña hasheada correctamente (no se guarda en texto plano)")
+                print()
+
+        print(f"{'='*80}\n")
 
 
 def register(email: str, password: str, rol, repo: Optional[InMemoryUserRepo] = None) -> Usuario:

@@ -189,7 +189,6 @@ class Usuario:
             raise ValueError("La contraseña debe tener al menos 8 caracteres")
 
         self.email = email
-        self.password = password
         self.password_hash = self._hash_password(password)
         # rol por defecto no asignado; puede asignarse con set_rol o pasarse al constructor
         self.rol = None
