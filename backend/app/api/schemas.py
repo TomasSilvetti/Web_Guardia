@@ -87,6 +87,7 @@ class IngresoUrgenciaRequest:
     nombre: Optional[str] = None
     apellido: Optional[str] = None
     obra_social: Optional[str] = None
+    numero_afiliado: Optional[str] = None
     domicilio: Optional[DomicilioRequest] = None
 
 

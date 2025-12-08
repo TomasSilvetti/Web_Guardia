@@ -34,6 +34,7 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
   const [obraSocial, setObraSocial] = useState('');
+  const [numeroAfiliado, setNumeroAfiliado] = useState('');
 
   // Datos del domicilio (para pacientes nuevos)
   const [calle, setCalle] = useState('');
@@ -118,7 +119,14 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
     if (pacienteExiste === false) {
       if (!nombre) newErrors.nombre = MENSAJES_VALIDACION.CAMPO_REQUERIDO;
       if (!apellido) newErrors.apellido = MENSAJES_VALIDACION.CAMPO_REQUERIDO;
-      if (!obraSocial) newErrors.obra_social = MENSAJES_VALIDACION.CAMPO_REQUERIDO;
+      
+      // Validar obra social y número de afiliado
+      if (obraSocial && obraSocial.trim()) {
+        // Si hay obra social, el número de afiliado es obligatorio
+        if (!numeroAfiliado || !numeroAfiliado.trim()) {
+          newErrors.numero_afiliado = 'El número de afiliado es obligatorio cuando se ingresa una obra social';
+        }
+      }
       
       // Validar domicilio
       if (!calle) newErrors.calle = MENSAJES_VALIDACION.CAMPO_REQUERIDO;
@@ -199,7 +207,8 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
       ...(pacienteExiste === false && {
         nombre,
         apellido,
-        obra_social: obraSocial,
+        obra_social: obraSocial && obraSocial.trim() ? obraSocial : 'sin obra social',
+        numero_afiliado: numeroAfiliado && numeroAfiliado.trim() ? numeroAfiliado : undefined,
         domicilio: {
           calle,
           numero: parseInt(numero),
@@ -236,6 +245,7 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
     setNombre('');
     setApellido('');
     setObraSocial('');
+    setNumeroAfiliado('');
     setCalle('');
     setNumero('');
     setLocalidad('');
@@ -352,9 +362,20 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
                     value={obraSocial}
                     onChange={(e) => setObraSocial(e.target.value)}
                     error={!!errors.obra_social}
-                    helperText={errors.obra_social}
+                    helperText={errors.obra_social || 'Dejar vacío si no tiene obra social'}
                     disabled={pacienteExiste === true || loading}
-                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth
+                    label="Número de Afiliado"
+                    value={numeroAfiliado}
+                    onChange={(e) => setNumeroAfiliado(e.target.value)}
+                    error={!!errors.numero_afiliado}
+                    helperText={errors.numero_afiliado || 'Obligatorio si tiene obra social'}
+                    disabled={pacienteExiste === true || loading}
+                    required={!!obraSocial && obraSocial.trim() !== ''}
                   />
                 </Grid>
               </Grid>

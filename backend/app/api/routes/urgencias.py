@@ -74,6 +74,7 @@ def registrar_ingreso(
             nombre=request.nombre,
             apellido=request.apellido,
             obra_social=request.obra_social,
+            numero_afiliado=request.numero_afiliado,
             domicilio=request.domicilio.__dict__ if request.domicilio else None
         )
         
