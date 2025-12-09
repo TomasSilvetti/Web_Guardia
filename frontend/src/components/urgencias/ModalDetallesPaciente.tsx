@@ -26,6 +26,7 @@ import ThermostatIcon from '@mui/icons-material/Thermostat';
 import AirIcon from '@mui/icons-material/Air';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import DescriptionIcon from '@mui/icons-material/Description';
+import CardMembershipIcon from '@mui/icons-material/CardMembership';
 import { obtenerDetalleIngreso, type IngresoDetalleResponse } from '../../services/urgenciasService';
 import { NIVELES_EMERGENCIA } from '../../utils/constants';
 
@@ -142,6 +143,34 @@ export const ModalDetallesPaciente: React.FC<ModalDetallesPacienteProps> = ({
                     {detalle.cuil_paciente}
                   </Typography>
                 </Grid>
+              </Grid>
+            </Paper>
+
+            {/* Obra Social */}
+            <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
+                <CardMembershipIcon color="primary" />
+                <Typography variant="h6">Cobertura Médica</Typography>
+              </Box>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" color="text.secondary">
+                    Obra Social
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold">
+                    {detalle.obra_social || 'Sin obra social'}
+                  </Typography>
+                </Grid>
+                {detalle.numero_afiliado && (
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" color="text.secondary">
+                      Número de Afiliado
+                    </Typography>
+                    <Typography variant="body1" fontWeight="bold">
+                      {detalle.numero_afiliado}
+                    </Typography>
+                  </Grid>
+                )}
               </Grid>
             </Paper>
 

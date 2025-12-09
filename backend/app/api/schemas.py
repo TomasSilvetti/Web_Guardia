@@ -191,6 +191,9 @@ class IngresoDetalleResponse:
     atencion_informe: Optional[str] = None
     atencion_doctor_nombre: Optional[str] = None
     atencion_doctor_apellido: Optional[str] = None
+    # Obra social (si existe)
+    obra_social: Optional[str] = None
+    numero_afiliado: Optional[str] = None
 
 
 # ============= Health Check Schema =============

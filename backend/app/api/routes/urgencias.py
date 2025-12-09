@@ -434,11 +434,21 @@ def obtener_detalle_ingreso(
             atencion_doctor_nombre = ingreso.atencion.doctor.nombre
             atencion_doctor_apellido = ingreso.atencion.doctor.apellido
         
+        # Preparar datos de obra social si existe
+        obra_social = None
+        numero_afiliado = None
+        
+        if ingreso.paciente.afiliado:
+            obra_social = ingreso.paciente.afiliado.obra_social.nombre
+            numero_afiliado = ingreso.paciente.afiliado.numero_afiliado
+        
         return IngresoDetalleResponse(
             id=ingreso.id,
             cuil_paciente=ingreso.cuil_paciente,
             nombre_paciente=ingreso.paciente.nombre,
             apellido_paciente=ingreso.paciente.apellido,
+            obra_social=obra_social,
+            numero_afiliado=numero_afiliado,
             nivel_emergencia=ingreso.nivel_emergencia.name,
             nivel_emergencia_nombre=ingreso.nivel_emergencia.value['nombre'],
             estado=ingreso.estado,

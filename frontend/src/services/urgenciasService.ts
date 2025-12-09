@@ -103,6 +103,8 @@ export interface IngresoDetalleResponse {
   cuil_paciente: string;
   nombre_paciente: string;
   apellido_paciente: string;
+  obra_social?: string;
+  numero_afiliado?: string;
   nivel_emergencia: string;
   nivel_emergencia_nombre: string;
   estado: string;
