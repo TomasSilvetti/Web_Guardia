@@ -2,7 +2,7 @@
  * Página de login y registro
  */
 import React, { useState } from 'react';
-import { Box, Container, Tabs, Tab } from '@mui/material';
+import { Box, Container, Tabs, Tab, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { LoginForm } from '../components/auth/LoginForm';
 import { RegisterForm } from '../components/auth/RegisterForm';
@@ -31,6 +31,20 @@ export const LoginPage: React.FC = () => {
       }}
     >
       <Container maxWidth="sm">
+        <Typography
+          variant="h2"
+          component="h1"
+          align="center"
+          sx={{
+            color: 'white',
+            fontWeight: 700,
+            mb: 4,
+            textShadow: '2px 2px 4px rgba(0,0,0,0.3)',
+            letterSpacing: '0.5px'
+          }}
+        >
+          Módulo Urgencias
+        </Typography>
         <Box
           sx={{
             backgroundColor: 'white',
@@ -69,6 +83,7 @@ export const LoginPage: React.FC = () => {
 };
 
 export default LoginPage;
+
 
 
 

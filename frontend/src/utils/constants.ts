@@ -73,7 +73,7 @@ export const MENSAJES_VALIDACION = {
   CAMPO_REQUERIDO: 'Este campo es obligatorio',
   CUIL_INVALIDO: 'El CUIL debe tener 11 dígitos',
   VALOR_NEGATIVO: 'El valor no puede ser negativo',
-  TEMPERATURA_INVALIDA: 'La temperatura debe estar entre 30 y 45 °C',
+  TEMPERATURA_INVALIDA: 'La temperatura debe ser un valor positivo',
   EMAIL_INVALIDO: 'El email no es válido',
   PASSWORD_MIN: 'La contraseña debe tener al menos 6 caracteres',
   MATRICULA_REQUERIDA: 'La matrícula es obligatoria para enfermeras'
@@ -87,6 +87,16 @@ export const RANGOS_SIGNOS_VITALES = {
   tensionSistolica: { min: 90, max: 120, unidad: 'mmHg' },
   tensionDiastolica: { min: 60, max: 80, unidad: 'mmHg' }
 } as const;
+
+// Obras sociales disponibles
+export const OBRAS_SOCIALES = [
+  'sin obra social',
+  'OSDE',
+  'Subsidio de Salud',
+  'Galeno',
+  'Swiss Medical',
+  'PAMI'
+] as const;
 
 
 

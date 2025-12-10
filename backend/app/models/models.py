@@ -174,8 +174,6 @@ class Enfermera(Persona):
 
 class Usuario:
     """Entidad para usuario del sistema
-
-    Ahora el constructor acepta un parámetro opcional `rol` (miembro de `Rol` o `str`).
     """
     def __init__(self, email: str, password: str, rol: Optional[object] = None):
         # Validaciones básicas por historia de usuario IS2025-005

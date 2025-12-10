@@ -48,8 +48,6 @@ class TestAuthService(unittest.TestCase):
         # Verificar los datos del usuario
         self.assertEqual(u.email, "medico@test.com")
         self.assertEqual(u.rol, Rol.MEDICO)
-        logger.info("✓ Asserts de email y rol pasados correctamente")
-        logger.info("✓ Verificaciones de mock pasadas correctamente\n")
 
     def test_registro_faltante_rol(self):
         logger.info("\n=== TEST: test_registro_faltante_rol ===")

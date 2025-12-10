@@ -239,6 +239,22 @@ def step_impl(context):
         if nivel_emergencia is None:
             raise ValueError(f"Nivel de emergencia desconocido: {nivel_emergencia_str}")
 
+    # Verificar si el paciente existe, si no, proporcionar domicilio por defecto
+    try:
+        paciente_existente = db_mockeada.obtener_paciente_por_cuil(cuil) if db_mockeada is not None and cuil is not None else None
+    except Exception:
+        paciente_existente = None
+
+    # Domicilio por defecto para pacientes nuevos
+    domicilio_default = {
+        'calle': 'Calle Default',
+        'numero': '123',
+        'localidad': 'Localidad Default',
+        'ciudad': 'Ciudad Default',
+        'provincia': 'Provincia Default',
+        'pais': 'Argentina'
+    } if paciente_existente is None else None
+
     try:
         # Guardar los datos del paciente para verificación posterior
         datos_paciente_nuevo = {
@@ -261,7 +277,8 @@ def step_impl(context):
             frecuencia_diastolica=frecuencia_diastolica,
             nombre=nombre,
             apellido=apellido,
-            obra_social=obra_social
+            obra_social=obra_social,
+            domicilio=domicilio_default
         )
     except Exception as e:
         excepcion_esperada = e
@@ -324,6 +341,16 @@ def step_impl(context):
         if obra_social is None and paciente_existente is None:
             obra_social = "OSDE"
 
+        # Domicilio por defecto para pacientes nuevos
+        domicilio_default = {
+            'calle': 'Calle Default',
+            'numero': '123',
+            'localidad': 'Localidad Default',
+            'ciudad': 'Ciudad Default',
+            'provincia': 'Provincia Default',
+            'pais': 'Argentina'
+        } if paciente_existente is None else None
+
         try:
             servicio_urgencias.registrar_urgencia(
                 cuil=cuil,
@@ -337,7 +364,8 @@ def step_impl(context):
                 frecuencia_diastolica=frecuencia_diastolica,
                 nombre=nombre,
                 apellido=apellido,
-                obra_social=obra_social
+                obra_social=obra_social,
+                domicilio=domicilio_default
             )
         except Exception as e:
             excepcion_esperada = e
@@ -535,7 +563,7 @@ def step_impl(context, nombre, nivel_ingreso):
 @when('se ingresa a urgencias el siguiente paciente con el mismo nivel de emergencia:')
 def step_impl(context):
     """Registrar un paciente (tabla de una fila) que tiene el mismo nivel de emergencia que otro en espera."""
-    global servicio_urgencias, enfermera, excepcion_esperada
+    global servicio_urgencias, enfermera, excepcion_esperada, db_mockeada
 
     excepcion_esperada = None
     # Reusar el paso 'se ingresa a urgencias el siguiente paciente' existente
@@ -580,6 +608,22 @@ def step_impl(context):
         apellido = row.get('Apellido') or row.get('apellido') or None
         obra_social = row.get('Obra Social') or row.get('obra social') or None
 
+        # Verificar si el paciente existe, si no, proporcionar domicilio por defecto
+        try:
+            paciente_existente = db_mockeada.obtener_paciente_por_cuil(cuil) if db_mockeada is not None and cuil is not None else None
+        except Exception:
+            paciente_existente = None
+
+        # Domicilio por defecto para pacientes nuevos
+        domicilio_default = {
+            'calle': 'Calle Default',
+            'numero': '123',
+            'localidad': 'Localidad Default',
+            'ciudad': 'Ciudad Default',
+            'provincia': 'Provincia Default',
+            'pais': 'Argentina'
+        } if paciente_existente is None else None
+
         try:
             ingreso, mensaje = servicio_urgencias.registrar_urgencia(
                 cuil=cuil,
@@ -593,7 +637,8 @@ def step_impl(context):
                 frecuencia_diastolica=frecuencia_diastolica,
                 nombre=nombre,
                 apellido=apellido,
-                obra_social=obra_social
+                obra_social=obra_social,
+                domicilio=domicilio_default
             )
             print(f"\n[DEBUG after register] ingreso.id={ingreso.id}, mensaje={mensaje}")
             print(f"[DEBUG after register] pending={[ing.cuil_paciente for ing in servicio_urgencias.obtener_ingresos_pendientes()]}")

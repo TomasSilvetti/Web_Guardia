@@ -11,7 +11,12 @@ import {
   Alert,
   CircularProgress,
   Grid,
-  Collapse
+  Collapse,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  FormHelperText
 } from '@mui/material';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import SaveIcon from '@mui/icons-material/Save';
@@ -19,7 +24,7 @@ import { SignosVitales } from './SignosVitales';
 import { NivelEmergenciaSelector } from './NivelEmergenciaSelector';
 import { useUrgencias } from '../../hooks/useUrgencias';
 import { validarCuil } from '../../services/pacientesService';
-import { MENSAJES_VALIDACION } from '../../utils/constants';
+import { MENSAJES_VALIDACION, OBRAS_SOCIALES } from '../../utils/constants';
 
 interface FormularioAdmisionProps {
   onSuccess?: () => void;
@@ -33,7 +38,7 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
   const [pacienteExiste, setPacienteExiste] = useState<boolean | null>(null);
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
-  const [obraSocial, setObraSocial] = useState('');
+  const [obraSocial, setObraSocial] = useState('sin obra social');
   const [numeroAfiliado, setNumeroAfiliado] = useState('');
 
   // Datos del domicilio (para pacientes nuevos)
@@ -121,7 +126,7 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
       if (!apellido) newErrors.apellido = MENSAJES_VALIDACION.CAMPO_REQUERIDO;
       
       // Validar obra social y número de afiliado
-      if (obraSocial && obraSocial.trim()) {
+      if (obraSocial && obraSocial.trim() && obraSocial !== 'sin obra social') {
         // Si hay obra social, el número de afiliado es obligatorio
         if (!numeroAfiliado || !numeroAfiliado.trim()) {
           newErrors.numero_afiliado = 'El número de afiliado es obligatorio cuando se ingresa una obra social';
@@ -152,7 +157,7 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
       newErrors.temperatura = MENSAJES_VALIDACION.CAMPO_REQUERIDO;
     } else {
       const temp = parseFloat(temperatura);
-      if (temp < 30 || temp > 45) {
+      if (temp <= 0) {
         newErrors.temperatura = MENSAJES_VALIDACION.TEMPERATURA_INVALIDA;
       }
     }
@@ -244,7 +249,7 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
     setCuil('');
     setNombre('');
     setApellido('');
-    setObraSocial('');
+    setObraSocial('sin obra social');
     setNumeroAfiliado('');
     setCalle('');
     setNumero('');
@@ -358,15 +363,22 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
                   />
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <TextField
-                    fullWidth
-                    label="Obra Social"
-                    value={obraSocial}
-                    onChange={(e) => setObraSocial(e.target.value)}
-                    error={!!errors.obra_social}
-                    helperText={errors.obra_social || 'Dejar vacío si no tiene obra social'}
-                    disabled={loading}
-                  />
+                  <FormControl fullWidth error={!!errors.obra_social} disabled={loading}>
+                    <InputLabel id="obra-social-label">Obra Social</InputLabel>
+                    <Select
+                      labelId="obra-social-label"
+                      label="Obra Social"
+                      value={obraSocial}
+                      onChange={(e) => setObraSocial(e.target.value)}
+                    >
+                      {OBRAS_SOCIALES.map((obra) => (
+                        <MenuItem key={obra} value={obra}>
+                          {obra}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    <FormHelperText>{errors.obra_social || 'Seleccione una obra social'}</FormHelperText>
+                  </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={4}>
                   <TextField
@@ -376,8 +388,8 @@ export const FormularioAdmision: React.FC<FormularioAdmisionProps> = ({ onSucces
                     onChange={(e) => setNumeroAfiliado(e.target.value)}
                     error={!!errors.numero_afiliado}
                     helperText={errors.numero_afiliado || 'Obligatorio si tiene obra social'}
-                    disabled={loading}
-                    required={!!obraSocial && obraSocial.trim() !== ''}
+                    disabled={loading || obraSocial === 'sin obra social'}
+                    required={obraSocial !== 'sin obra social'}
                   />
                 </Grid>
               </Grid>
