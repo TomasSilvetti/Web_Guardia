@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Optional
-from backend.app.models.models import Paciente
+from ..models.models import Paciente
 
 
 class PacientesRepo(ABC):

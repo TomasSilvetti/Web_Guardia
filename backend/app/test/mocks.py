@@ -1,6 +1,6 @@
 from typing import Dict, Optional
-from backend.app.interfaces.pacientes_repo import PacientesRepo
-from backend.app.models.models import Paciente
+from ..interfaces.pacientes_repo import PacientesRepo
+from ..models.models import Paciente
 
 
 class DBPacientes(PacientesRepo):
