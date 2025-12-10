@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from ..models.models import Paciente, Domicilio, ObraSocial, Afiliado
 
 
@@ -36,6 +36,51 @@ class InMemoryPacienteRepo:
         if cuil not in self._afiliaciones:
             self._afiliaciones[cuil] = set()
         self._afiliaciones[cuil].add(nombre_obra_social)
+
+    def get_all(self) -> List[Paciente]:
+        """Retorna todos los pacientes almacenados en memoria"""
+        return list(self._pacientes.values())
+
+    def count(self) -> int:
+        """Retorna la cantidad total de pacientes en memoria"""
+        return len(self._pacientes)
+
+    def get_all_obras_sociales(self) -> List[ObraSocial]:
+        """Retorna todas las obras sociales registradas"""
+        return list(self._obras_sociales.values())
+
+    def print_all_pacientes(self) -> None:
+        """Imprime información detallada de todos los pacientes en memoria"""
+        if not self._pacientes:
+            print("No hay pacientes registrados en memoria.")
+            return
+
+        print(f"\n{'='*80}")
+        print(f"PACIENTES EN MEMORIA - Total: {len(self._pacientes)}")
+        print(f"{'='*80}\n")
+
+        for paciente in self._pacientes.values():
+            print(f"  👤 {paciente.nombre} {paciente.apellido}")
+            print(f"     CUIL: {paciente.cuil}")
+            print(f"     Email: {paciente.email if paciente.email else 'N/A'}")
+            print(f"     Domicilio: {paciente.domicilio.calle} {paciente.domicilio.numero}, "
+                  f"{paciente.domicilio.localidad}, {paciente.domicilio.ciudad}")
+            
+            if paciente.afiliado:
+                print(f"     Obra Social: {paciente.afiliado.obra_social.nombre}")
+                print(f"     Nº Afiliado: {paciente.afiliado.numero_afiliado}")
+            else:
+                print(f"     Obra Social: Sin obra social")
+            print()
+
+        # Mostrar obras sociales registradas
+        if self._obras_sociales:
+            print(f"\n--- OBRAS SOCIALES REGISTRADAS ({len(self._obras_sociales)}) ---")
+            for os in self._obras_sociales.values():
+                print(f"  • {os.nombre}")
+            print()
+
+        print(f"{'='*80}\n")
 
 
 def registrar_paciente(

@@ -1,7 +1,7 @@
 /**
  * Tarjeta individual de paciente en la lista de espera
  */
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -11,7 +11,9 @@ import {
   Grid,
   Divider,
   Button,
-  CardActions
+  CardActions,
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -20,8 +22,10 @@ import ThermostatIcon from '@mui/icons-material/Thermostat';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import InfoIcon from '@mui/icons-material/Info';
 import { NIVELES_EMERGENCIA } from '../../utils/constants';
 import type { IngresoListItem } from '../../services/urgenciasService';
+import { ModalDetallesPaciente } from './ModalDetallesPaciente';
 
 interface TarjetaPacienteProps {
   ingreso: IngresoListItem;
@@ -38,12 +42,22 @@ export const TarjetaPaciente: React.FC<TarjetaPacienteProps> = ({
   onReclamar,
   onContinuar
 }) => {
+  const [modalOpen, setModalOpen] = useState(false);
+
   // Obtener información del nivel de emergencia
   const nivelInfo = Object.values(NIVELES_EMERGENCIA).find(
     n => n.valor === ingreso.nivel_emergencia
   );
 
   const color = nivelInfo?.color || '#757575';
+
+  const handleOpenModal = () => {
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
 
   // Formatear fecha de ingreso
   const fechaIngreso = new Date(ingreso.fecha_ingreso);
@@ -72,13 +86,25 @@ export const TarjetaPaciente: React.FC<TarjetaPacienteProps> = ({
     >
       <CardContent>
         <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-          <Box>
-            <Typography variant="h6">
-              {ingreso.apellido_paciente}, {ingreso.nombre_paciente}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              CUIL: {ingreso.cuil_paciente}
-            </Typography>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Box>
+              <Typography variant="h6">
+                {ingreso.apellido_paciente}, {ingreso.nombre_paciente}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                CUIL: {ingreso.cuil_paciente}
+              </Typography>
+            </Box>
+            <Tooltip title="Ver detalles completos del paciente">
+              <IconButton 
+                color="primary" 
+                size="small"
+                onClick={handleOpenModal}
+                sx={{ ml: 1 }}
+              >
+                <InfoIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
           <Chip
             label={nivelInfo?.nombre || ingreso.nivel_emergencia_nombre}
@@ -195,6 +221,13 @@ export const TarjetaPaciente: React.FC<TarjetaPacienteProps> = ({
           )}
         </CardActions>
       )}
+
+      {/* Modal de detalles */}
+      <ModalDetallesPaciente
+        open={modalOpen}
+        onClose={handleCloseModal}
+        ingresoId={ingreso.id}
+      />
     </Card>
   );
 };

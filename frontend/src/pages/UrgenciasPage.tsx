@@ -65,10 +65,12 @@ export const UrgenciasPage: React.FC = () => {
     <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
       <Navbar />
       
-      {/* Formulario en container */}
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <FormularioAdmision onSuccess={handleIngresoSuccess} />
-      </Container>
+      {/* Formulario en container - Solo visible para enfermeras */}
+      {!esMedico && (
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          <FormularioAdmision onSuccess={handleIngresoSuccess} />
+        </Container>
+      )}
 
       {/* Listas ocupando todo el ancho */}
       <Box sx={{ px: 9, pb: 4 }}>

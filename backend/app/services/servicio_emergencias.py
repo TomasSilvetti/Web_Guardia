@@ -39,6 +39,7 @@ class ServicioEmergencias:
         nombre: Optional[str],
         apellido: Optional[str],
         obra_social: Optional[str],
+        numero_afiliado: Optional[str] = None,
         domicilio: Optional[dict] = None
     ) -> Tuple[Ingreso, Optional[str]]:
         """
@@ -63,6 +64,7 @@ class ServicioEmergencias:
             nombre: Nombre del paciente (requerido si el paciente no existe)
             apellido: Apellido del paciente (requerido si el paciente no existe)
             obra_social: Obra social del paciente (requerido si el paciente no existe)
+            numero_afiliado: Número de afiliado (requerido si hay obra social)
             domicilio: Domicilio del paciente (requerido si el paciente no existe)
 
         Returns:
@@ -109,11 +111,18 @@ class ServicioEmergencias:
             if apellido is None:
                 raise ValueError("El campo apellido es obligatorio")
 
-            if obra_social is None:
-                raise ValueError("El campo obra social es obligatorio")
-
             if domicilio is None:
                 raise ValueError("El campo domicilio es obligatorio para crear un paciente nuevo")
+
+            # Validar obra social y número de afiliado
+            if obra_social and obra_social.strip() and obra_social.lower() != "sin obra social":
+                # Si hay obra social, el número de afiliado es obligatorio
+                if not numero_afiliado or not numero_afiliado.strip():
+                    raise ValueError("El campo número de afiliado es obligatorio cuando se ingresa una obra social")
+            
+            # Si no hay obra social, establecer valor por defecto
+            if not obra_social or not obra_social.strip():
+                obra_social = "sin obra social"
 
             # Crear el paciente automáticamente
             mensaje_advertencia = "El paciente no existe en el sistema y debe ser registrado antes de proceder al ingreso"
@@ -131,9 +140,11 @@ class ServicioEmergencias:
             
             # Crear obra social y afiliado si se proporcionó
             afiliado = None
-            if obra_social:
+            if obra_social and obra_social.lower() != "sin obra social":
                 obra_social_obj = ObraSocial(obra_social)
-                afiliado = Afiliado(obra_social_obj, "000000")  # número de afiliado temporal
+                # Usar el número de afiliado proporcionado o "000000" como fallback
+                num_afiliado = numero_afiliado if numero_afiliado and numero_afiliado.strip() else "000000"
+                afiliado = Afiliado(obra_social_obj, num_afiliado)
             
             paciente = Paciente(nombre, apellido, cuil, domicilio_obj, afiliado)
             self.pacientes_repo.guardar_paciente(paciente)
